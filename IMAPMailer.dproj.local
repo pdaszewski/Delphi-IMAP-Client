@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>1899-12-30 00:00:00.000.299,C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Unit1.dfm=D:\2\Mailer\AOknoGl_frm.dfm</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.964,=C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.299,C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Project1.dproj=D:\2\Mailer\Mailer.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.788,D:\2\Delphi IMAP\Wersja 1.0.0\DostawyNIKEeMailAuto.dproj=D:\2\Delphi IMAP\Wersja 1.0.0\IMAPMailer.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.299,C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Unit1.pas=D:\2\Mailer\AOknoGl_frm.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.950,D:\Prace\Adrenaline.pl\!Projekty programistyczne\Adrenaline DostawyNIKE eMail IMAP\Wersja 0.1.0\DostawyNIKEeMailAuto.dproj=D:\Prace\Adrenaline.pl\!Projekty programistyczne\Adrenaline DostawyNIKE eMail IMAP\Wersja 0.1.0\Mailer.dproj</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.755,=C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>1899-12-30 00:00:00.000.527,=C:\Users\Piotr Daszewski\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+  </Transactions>
+	<ActiveMobileDevice>
+		<NoProfile iOSSimulator="iPhone5"/>
+	</ActiveMobileDevice>
+</BorlandProject>
