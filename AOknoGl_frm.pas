@@ -11,23 +11,24 @@ uses
 
 type
   TAOknoGl = class(TForm)
-    btn_pobierz: TButton;
+    btn_get_messages: TButton;
     ListBox1: TListBox;
     ProgressBar: TProgressBar;
     btn_stop: TButton;
     ProgressBarAutoStart: TProgressBar;
     Start: TTimer;
     AutoRun: TTimer;
-    procedure PobierzWiadomosci(const UserName, Password: string; Logi: TStrings);
-    procedure Wczytaj_plik(sciezka_do_pliku: String);
 
-    procedure btn_pobierzClick(Sender: TObject);
+    procedure GetMessages(const UserName, Password: string; Logi: TStrings);
+    procedure Load_file(path_to_file: String);
+    procedure Add_to_log(text: String; insert_date_time: Boolean);
+
+    procedure btn_get_messagesClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure DeleteAllFiles(dir : string);
     procedure StartTimer(Sender: TObject);
     procedure btn_stopClick(Sender: TObject);
-    procedure Wstaw_log(wpis: String; czy_data: Boolean);
     procedure AutoRunTimer(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
@@ -38,7 +39,7 @@ type
 
 const
  wersja = '1.0.0';
- data_kompilacji = '2018-10-19';
+ data_kompilacji = '2018-10-25';
 
 var
   AOknoGl: TAOknoGl;
@@ -53,10 +54,10 @@ implementation
 
 {$R *.dfm}
 
-procedure TAOknoGl.Wstaw_log(wpis: String; czy_data: Boolean);
+procedure TAOknoGl.Add_to_log(text: String; insert_date_time: Boolean);
 Begin
- if czy_data then logi.Add('['+DateTimeToStr(Now)+'] - '+wpis)
- else logi.Add(wpis);
+ if insert_date_time then logi.Add('['+DateTimeToStr(Now)+'] - '+text)
+ else logi.Add(text);
 End;
 
 procedure TAOknoGl.DeleteAllFiles(dir : string);
@@ -92,16 +93,16 @@ begin
    Start.Enabled:=False;
    btn_stop.Visible:=False;
    Application.ProcessMessages;
-   btn_pobierzClick(Self);
+   btn_get_messagesClick(Self);
   End;
 end;
 
-procedure TAOknoGl.btn_pobierzClick(Sender: TObject);
+procedure TAOknoGl.btn_get_messagesClick(Sender: TObject);
 begin
  btn_stopClick(Self);
- btn_pobierz.Enabled:=False;
+ btn_get_messages.Enabled:=False;
  Application.ProcessMessages;
- PobierzWiadomosci('some e-mail address','some password', ListBox1.Items);
+ GetMessages('some e-mail address','some password', ListBox1.Items);
  Close;
 end;
 
@@ -115,9 +116,9 @@ end;
 procedure TAOknoGl.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
  lista_odebranych.SaveToFile(lista_odebranych_plik);
- Wstaw_log('Zamykam aplikacjê',True);
- Wstaw_log('===============================================================================================',False);
- Wstaw_log('',False);
+ Add_to_log('I''m closing the application',True);
+ Add_to_log('===============================================================================================',False);
+ Add_to_log('',False);
  logi.SaveToFile(plik_logu);
 end;
 
@@ -157,19 +158,19 @@ begin
 
  ProgressBarAutoStart.Position:=ProgressBarAutoStart.Max;
  Start.Enabled:=True;
- btn_pobierz.Enabled:=True;
+ btn_get_messages.Enabled:=True;
  btn_stop.Enabled:=True;
 
- Wstaw_log('===============================================================================================',False);
- Wstaw_log('Uruchomienie aplikacji odbierania z e-mail, wersja: '+wersja,True);
- Wstaw_log('',False);
+ Add_to_log('===============================================================================================',False);
+ Add_to_log('Launch the receiving application from e-mail, version: '+wersja,True);
+ Add_to_log('',False);
 end;
 
 
 procedure TAOknoGl.FormCreate(Sender: TObject);
 begin
- Caption:='Mailer Wersja '+wersja;
- btn_pobierz.Enabled:=False;
+ Caption:='Mailer Version '+wersja;
+ btn_get_messages.Enabled:=False;
  btn_stop.Enabled:=False;
  ProgressBarAutoStart.Position:=0;
 end;
@@ -179,7 +180,7 @@ begin
  AutoRun.Enabled:=True;
 end;
 
-procedure TAOknoGl.PobierzWiadomosci(const UserName, Password: string; Logi: TStrings);
+procedure TAOknoGl.GetMessages(const UserName, Password: string; Logi: TStrings);
 var
   MsgIndex: Integer;
   MsgObject: TIdMessage;
@@ -234,7 +235,7 @@ begin
                     Application.ProcessMessages;
                     if MsgObject.MessageParts.AttachmentCount > 0 then
                     Begin
-                      Logi.Add(' >> Widomoœæ zawiera za³¹czników: ' + IntToStr(MsgObject.MessageParts.AttachmentCount));
+                      Logi.Add(' >> The message contains attachments: ' + IntToStr(MsgObject.MessageParts.AttachmentCount));
                       for PartIndex := 0 to MsgObject.MessageParts.Count - 1 do
                       Begin
                         if MsgObject.MessageParts[PartIndex] is TIdAttachment then
@@ -243,8 +244,10 @@ begin
                           Logi.Add(' -> ' + nazwa_pliku);
                           TIdAttachment(MsgObject.MessageParts[PartIndex]).SaveToFile(folder_tmp + nazwa_pliku);
                           nowy_plik:=folder_tmp+nazwa_pliku;
+
                           if AnsiLowerCase(ExtractFileExt(nowy_plik))='.csv' then
-                          Wczytaj_plik(nowy_plik);
+                          Load_file(nowy_plik);
+
                         End;
                       End;
                     End;
@@ -275,7 +278,7 @@ begin
   end;
 end;
 
-procedure TAOknoGl.Wczytaj_plik(sciezka_do_pliku: String);
+procedure TAOknoGl.Load_file(path_to_file: String);
 Begin
  { TODO : In this place you can write import from file }
 End;

@@ -22,14 +22,14 @@ object AOknoGl: TAOknoGl
     474)
   PixelsPerInch = 96
   TextHeight = 13
-  object btn_pobierz: TButton
+  object btn_get_messages: TButton
     Left = 8
     Top = 8
     Width = 281
     Height = 25
-    Caption = 'pobierz dane ze skrzynki pocztowej'
+    Caption = 'download data from mailbox'
     TabOrder = 0
-    OnClick = btn_pobierzClick
+    OnClick = btn_get_messagesClick
   end
   object ListBox1: TListBox
     Left = 8
