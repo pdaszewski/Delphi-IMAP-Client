@@ -2,7 +2,7 @@ program IMAPMailer;
 
 uses
   Vcl.Forms,
-  AOknoGl_frm in 'AOknoGl_frm.pas' {AOknoGl},
+  AOknoGl_frm in 'AOknoGl_frm.pas' {MainForm},
   Vcl.Themes,
   Vcl.Styles;
 
@@ -12,6 +12,6 @@ begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   Application.Title := 'Mailer';
-  Application.CreateForm(TAOknoGl, AOknoGl);
+  Application.CreateForm(TMainForm, MainForm);
   Application.Run;
 end.

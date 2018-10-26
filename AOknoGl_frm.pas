@@ -10,7 +10,7 @@ uses
   IdMessageClient, IdAttachment, Vcl.ComCtrls, Vcl.ExtCtrls, Data.DB, Data.Win.ADODB;
 
 type
-  TAOknoGl = class(TForm)
+  TMainForm = class(TForm)
     btn_get_messages: TButton;
     ListBox1: TListBox;
     ProgressBar: TProgressBar;
@@ -19,8 +19,13 @@ type
     Start: TTimer;
     AutoRun: TTimer;
 
+    ///<summary>Connection procedure to INBOX for given user and password</summary>
     procedure GetMessages(const UserName, Password: string; Logi: TStrings);
+
+    ///<summary>Procedure to load new files from attachements</summary>
     procedure Load_file(path_to_file: String);
+
+    ///<summary>Procedure to insert text to logs list</summary>
     procedure Add_to_log(text: String; insert_date_time: Boolean);
 
     procedure btn_get_messagesClick(Sender: TObject);
@@ -38,29 +43,28 @@ type
   end;
 
 const
- wersja = '1.0.0';
- data_kompilacji = '2018-10-25';
+ version = '1.0.0';
+ compilation_date = '2018-10-26';
 
 var
-  AOknoGl: TAOknoGl;
-  lista_odebranych : TStringList;
-  lista_odebranych_plik : String;
-  folder_tmp : String;
-  plik_logu : String;
-  logi : TStringList;
-  ostatniSQL : String;
+  MainForm: TMainForm;
+  inbox_list : TStringList;
+  file_with_inbox_list : String;
+  tmp_directory : String;
+  log_file : String;
+  logs : TStringList;
 
 implementation
 
 {$R *.dfm}
 
-procedure TAOknoGl.Add_to_log(text: String; insert_date_time: Boolean);
+procedure TMainForm.Add_to_log(text: String; insert_date_time: Boolean);
 Begin
- if insert_date_time then logi.Add('['+DateTimeToStr(Now)+'] - '+text)
- else logi.Add(text);
+ if insert_date_time then logs.Add('['+DateTimeToStr(Now)+'] - '+text)
+ else logs.Add(text);
 End;
 
-procedure TAOknoGl.DeleteAllFiles(dir : string);
+procedure TMainForm.DeleteAllFiles(dir : string);
   var sl   : tstringlist;
       sr   : tsearchrec;
       i,mx : integer;
@@ -85,7 +89,7 @@ Begin
   end;
 end;
 
-procedure TAOknoGl.StartTimer(Sender: TObject);
+procedure TMainForm.StartTimer(Sender: TObject);
 begin
  ProgressBarAutoStart.Position:=ProgressBarAutoStart.Position-1;
  if ProgressBarAutoStart.Position=0 then
@@ -97,7 +101,7 @@ begin
   End;
 end;
 
-procedure TAOknoGl.btn_get_messagesClick(Sender: TObject);
+procedure TMainForm.btn_get_messagesClick(Sender: TObject);
 begin
  btn_stopClick(Self);
  btn_get_messages.Enabled:=False;
@@ -106,54 +110,54 @@ begin
  Close;
 end;
 
-procedure TAOknoGl.btn_stopClick(Sender: TObject);
+procedure TMainForm.btn_stopClick(Sender: TObject);
 begin
  Start.Enabled:=False;
  ProgressBarAutoStart.Visible:=False;
  btn_stop.Visible:=False;
 end;
 
-procedure TAOknoGl.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
- lista_odebranych.SaveToFile(lista_odebranych_plik);
+ inbox_list.SaveToFile(file_with_inbox_list);
  Add_to_log('I''m closing the application',True);
  Add_to_log('===============================================================================================',False);
  Add_to_log('',False);
- logi.SaveToFile(plik_logu);
+ logs.SaveToFile(log_file);
 end;
 
-procedure TAOknoGl.AutoRunTimer(Sender: TObject);
+procedure TMainForm.AutoRunTimer(Sender: TObject);
 Var
-  struktura : String;
+  path_name : String;
 begin
  AutoRun.Enabled:=False;
 
- struktura:=ExtractFilePath(Application.ExeName)+'Dane';
- if DirectoryExists(struktura)=False then CreateDir(struktura);
+ path_name:=ExtractFilePath(Application.ExeName)+'Dane';
+ if DirectoryExists(path_name)=False then CreateDir(path_name);
 
- if DirectoryExists(struktura+'\Kopie')=False then CreateDir(struktura+'\Kopie');
+ if DirectoryExists(path_name+'\Kopie')=False then CreateDir(path_name+'\Kopie');
 
- plik_logu:=ExtractFilePath(Application.ExeName)+'Logi';
- if DirectoryExists(plik_logu)=False then CreateDir(plik_logu);
- plik_logu:=plik_logu+'\log_'+DateToStr(Now)+'.txt';
+ log_file:=ExtractFilePath(Application.ExeName)+'Logi';
+ if DirectoryExists(log_file)=False then CreateDir(log_file);
+ log_file:=log_file+'\log_'+DateToStr(Now)+'.txt';
 
- logi := TStringList.Create;
- if FileExists(plik_logu) then logi.LoadFromFile(plik_logu);
+ logs := TStringList.Create;
+ if FileExists(log_file) then logs.LoadFromFile(log_file);
 
- folder_tmp:=struktura+'\temp\';
- if DirectoryExists(folder_tmp)=False then CreateDir(folder_tmp);
+ tmp_directory:=path_name+'\temp\';
+ if DirectoryExists(tmp_directory)=False then CreateDir(tmp_directory);
 
- DeleteAllFiles(folder_tmp);
+ DeleteAllFiles(tmp_directory);
 
- lista_odebranych := TStringList.Create;
- lista_odebranych.Sorted := True;
- lista_odebranych_plik:=struktura+'\lista_odebranych.dat';
+ inbox_list := TStringList.Create;
+ inbox_list.Sorted := True;
+ file_with_inbox_list:=path_name+'\lista_odebranych.dat';
 
- if FileExists(lista_odebranych_plik) then
+ if FileExists(file_with_inbox_list) then
   Begin
-   struktura:=struktura+'\Kopie\lista_odebranych_'+DateToStr(Now)+'.dat';
-   CopyFile(PWideChar(lista_odebranych_plik),PWideChar(struktura),False);
-   lista_odebranych.LoadFromFile(lista_odebranych_plik);
+   path_name:=path_name+'\Kopie\lista_odebranych_'+DateToStr(Now)+'.dat';
+   CopyFile(PWideChar(file_with_inbox_list),PWideChar(path_name),False);
+   inbox_list.LoadFromFile(file_with_inbox_list);
   End;
 
  ProgressBarAutoStart.Position:=ProgressBarAutoStart.Max;
@@ -162,37 +166,37 @@ begin
  btn_stop.Enabled:=True;
 
  Add_to_log('===============================================================================================',False);
- Add_to_log('Launch the receiving application from e-mail, version: '+wersja,True);
+ Add_to_log('Launch the receiving application from e-mail, version: '+version,True);
  Add_to_log('',False);
 end;
 
 
-procedure TAOknoGl.FormCreate(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
 begin
- Caption:='Mailer Version '+wersja;
+ Caption:='Mailer Version '+version;
  btn_get_messages.Enabled:=False;
  btn_stop.Enabled:=False;
  ProgressBarAutoStart.Position:=0;
 end;
 
-procedure TAOknoGl.FormShow(Sender: TObject);
+procedure TMainForm.FormShow(Sender: TObject);
 begin
  AutoRun.Enabled:=True;
 end;
 
-procedure TAOknoGl.GetMessages(const UserName, Password: string; Logi: TStrings);
+procedure TMainForm.GetMessages(const UserName, Password: string; Logi: TStrings);
 var
   MsgIndex: Integer;
   MsgObject: TIdMessage;
   PartIndex: Integer;
   IMAPClient: TIdIMAP4;
   OpenSSLHandler: TIdSSLIOHandlerSocketOpenSSL;
-  nazwa_pliku: string;
-  identyfikator_wiadomosci: string;
-  data_wiadomosci: string;
-  adres_wysylajacego: string;
-  temat_wiadomosci: string;
-  nowy_plik: string;
+  file_name: string;
+  message_identifier: string;
+  message_date: string;
+  sending_address: string;
+  message_topic: string;
+  new_file: string;
 begin
   Logi.Clear;
   IMAPClient := TIdIMAP4.Create(nil);
@@ -220,18 +224,18 @@ begin
                 IMAPClient.Retrieve(MsgIndex, MsgObject);
                 MsgObject.MessageParts.CountParts;
 
-                identyfikator_wiadomosci:=MsgObject.MsgId;
+                message_identifier:=MsgObject.MsgId;
 
-                if lista_odebranych.IndexOf(identyfikator_wiadomosci) = -1 then
+                if inbox_list.IndexOf(message_identifier) = -1 then
                  Begin
-                  data_wiadomosci := DateTimeToStr(MsgObject.Date);
-                  adres_wysylajacego := MsgObject.From.Address;
-                  temat_wiadomosci := MsgObject.Subject;
+                  message_date := DateTimeToStr(MsgObject.Date);
+                  sending_address := MsgObject.From.Address;
+                  message_topic := MsgObject.Subject;
 
-                  // if adres_wysylajacego='some excepted e-mail adress' then
+                  // if sending_address='some excepted e-mail adress' then
                   Begin
 
-                    Logi.Add(identyfikator_wiadomosci + ' - ' + data_wiadomosci + ' - ' + adres_wysylajacego + ' - ' + temat_wiadomosci);
+                    Logi.Add(message_identifier + ' - ' + message_date + ' - ' + sending_address + ' - ' + message_topic);
                     Application.ProcessMessages;
                     if MsgObject.MessageParts.AttachmentCount > 0 then
                     Begin
@@ -240,13 +244,13 @@ begin
                       Begin
                         if MsgObject.MessageParts[PartIndex] is TIdAttachment then
                         Begin
-                          nazwa_pliku := TIdAttachment(MsgObject.MessageParts[PartIndex]).FileName;
-                          Logi.Add(' -> ' + nazwa_pliku);
-                          TIdAttachment(MsgObject.MessageParts[PartIndex]).SaveToFile(folder_tmp + nazwa_pliku);
-                          nowy_plik:=folder_tmp+nazwa_pliku;
+                          file_name := TIdAttachment(MsgObject.MessageParts[PartIndex]).FileName;
+                          Logi.Add(' -> ' + file_name);
+                          TIdAttachment(MsgObject.MessageParts[PartIndex]).SaveToFile(tmp_directory + file_name);
+                          new_file:=tmp_directory+file_name;
 
-                          if AnsiLowerCase(ExtractFileExt(nowy_plik))='.csv' then
-                          Load_file(nowy_plik);
+                          if AnsiLowerCase(ExtractFileExt(new_file))='.csv' then
+                          Load_file(new_file);
 
                         End;
                       End;
@@ -254,7 +258,7 @@ begin
 
                   End;
 
-                  lista_odebranych.Add(identyfikator_wiadomosci);
+                  inbox_list.Add(message_identifier);
                  End;
 
               finally
@@ -278,7 +282,7 @@ begin
   end;
 end;
 
-procedure TAOknoGl.Load_file(path_to_file: String);
+procedure TMainForm.Load_file(path_to_file: String);
 Begin
  { TODO : In this place you can write import from file }
 End;
